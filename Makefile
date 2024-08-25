@@ -65,21 +65,21 @@ endif
 
 FRONTEND_OBJS = pad.o xparam.o fntsys.o renderman.o menusys.o OSDHistory.o system.o lang.o lang_internal.o config.o hdd.o dialogs.o \
 		dia.o ioman.o texcache.o themes.o supportbase.o bdmsupport.o ethsupport.o hddsupport.o zso.o lz4.o \
-		appsupport.o gui.o guigame.o textures.o opl.o atlas.o nbns.o httpclient.o gsm.o cheatman.o sound.o ps2cnf.o
+		appsupport.o mmcesupport.o gui.o guigame.o textures.o opl.o atlas.o nbns.o httpclient.o gsm.o cheatman.o sound.o ps2cnf.o
 
 IOP_OBJS =	iomanx.o filexio.o ps2fs.o usbd.o bdmevent.o \
 		bdm.o bdmfs_fatfs.o usbmass_bd.o iLinkman.o IEEE1394_bd.o mx4sio_bd.o \
 		ps2atad.o hdpro_atad.o poweroff.o ps2hdd.o xhdd.o genvmc.o lwnbdsvr.o \
 		ps2dev9.o smsutils.o ps2ip.o smap.o isofs.o nbns-iop.o \
-		sio2man.o padman.o mcman.o mcserv.o \
+		sio2man.o padman.o mcman.o mcserv.o mmceman.o mmcedrv.o \
 		httpclient-iop.o netman.o ps2ips.o \
-		bdm_mcemu.o hdd_mcemu.o smb_mcemu.o \
+		bdm_mcemu.o mmce_mcemu.o hdd_mcemu.o smb_mcemu.o \
 		iremsndpatch.o apemodpatch.o f2techioppatch.o cleareffects.o resetspu.o \
 		libsd.o audsrv.o
 
 EECORE_OBJS = ee_core.o ioprp.o util.o imgdrv.o eesync.o \
 		bdm_cdvdman.o IOPRP_img.o smb_cdvdman.o \
-		hdd_cdvdman.o hdd_hdpro_cdvdman.o cdvdfsv.o \
+		hdd_cdvdman.o mmce_cdvdman.o hdd_hdpro_cdvdman.o cdvdfsv.o \
 		ingame_smstcpip.o smap_ingame.o smbman.o smbinit.o
 
 PNG_ASSETS = load0 load1 load2 load3 load4 load5 load6 load7 usb usb_bd ilk_bd \
@@ -246,6 +246,7 @@ clean:	download_lwNBD
 	$(MAKE) -C modules/iopcore/imgdrv clean
 	echo " -cdvdman"
 	$(MAKE) -C modules/iopcore/cdvdman USE_BDM=1 clean
+	$(MAKE) -C modules/iopcore/cdvdman USE_MMCE=1 clean
 	$(MAKE) -C modules/iopcore/cdvdman USE_SMB=1 clean
 	$(MAKE) -C modules/iopcore/cdvdman USE_HDD=1 clean
 	$(MAKE) -C modules/iopcore/cdvdman USE_HDPRO=1 clean
@@ -282,6 +283,7 @@ clean:	download_lwNBD
 	$(MAKE) -C modules/hdd/xhdd clean
 	echo " -mcemu"
 	$(MAKE) -C modules/mcemu USE_BDM=1 clean
+	$(MAKE) -C modules/mcemu USE_MMCE=1 clean
 	$(MAKE) -C modules/mcemu USE_HDD=1 clean
 	$(MAKE) -C modules/mcemu USE_SMB=1 clean
 	echo " -genvmc"
@@ -361,6 +363,12 @@ ee_core/ee_core.elf: ee_core
 $(EE_ASM_DIR)ee_core.c: ee_core/ee_core.elf | $(EE_ASM_DIR)
 	$(BIN2C) $< $@ eecore_elf
 
+$(EE_ASM_DIR)mmceman.c: $(PS2SDK)/iop/irx/mmceman.irx | $(EE_ASM_DIR)
+	$(BIN2C) $< $@ $(*F)_irx
+
+$(EE_ASM_DIR)mmcedrv.c: $(PS2SDK)/iop/irx/mmcedrv.irx | $(EE_ASM_DIR)
+	$(BIN2C) $< $@ $(*F)_irx
+
 modules/iopcore/imgdrv/imgdrv.irx: modules/iopcore/imgdrv
 	$(MAKE) -C $<
 
@@ -374,6 +382,12 @@ modules/iopcore/cdvdman/bdm_cdvdman.irx: modules/iopcore/cdvdman
 	$(MAKE) $(CDVDMAN_PS2LOGO_FLAGS) $(CDVDMAN_DEBUG_FLAGS) USE_BDM=1 -C $< all
 
 $(EE_ASM_DIR)bdm_cdvdman.c: modules/iopcore/cdvdman/bdm_cdvdman.irx | $(EE_ASM_DIR)
+	$(BIN2C) $< $@ $(*F)_irx
+
+modules/iopcore/cdvdman/mmce_cdvdman.irx: modules/iopcore/cdvdman
+	$(MAKE) $(CDVDMAN_PS2LOGO_FLAGS) $(CDVDMAN_DEBUG_FLAGS) USE_MMCE=1 -C $< all
+
+$(EE_ASM_DIR)mmce_cdvdman.c: modules/iopcore/cdvdman/mmce_cdvdman.irx | $(EE_ASM_DIR)
 	$(BIN2C) $< $@ $(*F)_irx
 
 modules/iopcore/cdvdman/smb_cdvdman.irx: modules/iopcore/cdvdman
@@ -434,6 +448,12 @@ modules/mcemu/bdm_mcemu.irx: modules/mcemu
 	$(MAKE) $(MCEMU_DEBUG_FLAGS) $(PADEMU_FLAGS) USE_BDM=1 -C $< all
 
 $(EE_ASM_DIR)bdm_mcemu.c: modules/mcemu/bdm_mcemu.irx
+	$(BIN2C) $< $@ $(*F)_irx
+
+modules/mcemu/mmce_mcemu.irx: modules/mcemu
+	$(MAKE) $(MCEMU_DEBUG_FLAGS) $(PADEMU_FLAGS) USE_MMCE=1 -C $< all
+
+$(EE_ASM_DIR)mmce_mcemu.c: modules/mcemu/mmce_mcemu.irx
 	$(BIN2C) $< $@ $(*F)_irx
 
 modules/mcemu/hdd_mcemu.irx: modules/mcemu
@@ -745,13 +765,13 @@ LANG_COMPILER = lang_compiler.py
 languages: $(ENGLISH_TEMPLATE_YML) $(TRANSLATIONS_YML) $(ENGLISH_LNG) $(TRANSLATIONS_LNG) $(INTERNAL_LANGUAGE_C) $(INTERNAL_LANGUAGE_H)
 
 download_lng:
-	./download_lng.sh
+	echo no
 
 download_lwNBD:
-	./download_lwNBD.sh
+	echo no
 
 download_cfla:
-	./download_cfla.sh
+	echo no
 
 $(TRANSLATIONS_LNG): $(LNG_DIR)lang_%.lng: $(LNG_SRC_DIR)%.yml $(BASE_LANGUAGE) $(LANG_COMPILER)
 	python3 $(LANG_COMPILER) --make_lng --base $(BASE_LANGUAGE) --translation $< $@

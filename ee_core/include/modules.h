@@ -34,6 +34,9 @@ enum OPL_MODULE_ID {
     // Special patches
     OPL_MODULE_ID_IOP_PATCH,
 
+    // MMCEDRV module
+    OPL_MODULE_ID_MMCEDRV,
+
     OPL_MODULE_ID_COUNT
 };
 
