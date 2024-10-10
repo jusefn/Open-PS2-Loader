@@ -382,6 +382,7 @@ void guiGameShowGSConfig(void)
         "HDTV 480p @60Hz",
         "HDTV 576p @50Hz",
         "HDTV 720p @60Hz",
+        "HDTV 1080p @60Hz",
         "HDTV 1080i @60Hz",
         "HDTV 1080i @60Hz Non Interlaced",
         "VGA 640x480p @60Hz",
