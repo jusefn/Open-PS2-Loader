@@ -59,6 +59,7 @@ static struct rm_mode rm_mode_table[NUM_RM_VMODES] = {
     // 16 bit color mode full screen, multi-pass (3 passes, HIRES)
     {GS_MODE_DTV_720P,   31, 1280,  720,  3, 1, GS_NONINTERLACED, GS_FRAME, RM_ARATIO_16_9, 1,  1}, // HDTV720P@60Hz
     {GS_MODE_DTV_1080I,  31, 1920, 1080,  3, 1, GS_INTERLACED,    GS_FRAME, RM_ARATIO_16_9, 1,  1}, // HDTV1080I@60Hz
+    {GS_MODE_DTV_1080P,  31, 1920, 1080,  3, 1, GS_NONINTERLACED, GS_FRAME, RM_ARATIO_16_9, 1,  1}, // HDTV1080P@60Hz
 };
 // clang-format on
 
