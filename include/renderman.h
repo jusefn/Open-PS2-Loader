@@ -18,6 +18,7 @@
 
 /// DTV 576 Progressive Scan (720x576). Not available in ROM v1.70 and earlier.
 #define GS_MODE_DTV_576P 0x53
+#define GS_MODE_DTV_1080P 0x54
 
 #define DIM_UNDEF -1
 
