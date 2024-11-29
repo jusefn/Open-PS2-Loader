@@ -853,6 +853,9 @@ void guiShowMMCEConfig()
         diaGetInt(diaMMCEConfig, CFG_MMCESLOT, &gMMCESlot);
         diaGetInt(diaMMCEConfig, CFG_MMCEGAMEID, &gMMCEEnableGameID);
     }
+
+    applyConfig(-1, -1, 0);
+    menuReinitMainMenu();
 }
 
 void guiShowParentalLockConfig(void)
