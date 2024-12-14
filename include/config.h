@@ -100,6 +100,7 @@ enum CONFIG_INDEX {
 #define CONFIG_OPL_SMB_CACHE            "smb_cache"
 #define CONFIG_OPL_MMCE_SLOT            "mmce_slot"
 #define CONFIG_OPL_MMCE_GAMEID          "mmce_gameid"
+#define CONFIG_OPL_MMCE_SEMA            "mmce_sema"
 #define CONFIG_OPL_ENABLE_ILINK         "enable_ilink"
 #define CONFIG_OPL_ENABLE_MX4SIO        "enable_mx4sio"
 #define CONFIG_OPL_SWAP_SEL_BUTTON      "swap_select_btn"

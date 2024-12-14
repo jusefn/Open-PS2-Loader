@@ -139,6 +139,7 @@ int bdmCacheSize;
 int hddCacheSize;
 int smbCacheSize;
 int gMMCESlot;
+int gMMCESema;
 int gMMCEEnableGameID;
 int gEnableILK;
 int gEnableMX4SIO;
@@ -938,6 +939,7 @@ static void _loadConfig()
 #ifdef __DEBUG
             configGetInt(configOPL, CONFIG_OPL_MMCE_GAMEID, &gMMCEEnableGameID);
 #endif
+            configGetInt(configOPL, CONFIG_OPL_MMCE_SEMA, &gMMCESema);
             configGetInt(configOPL, CONFIG_OPL_ENABLE_ILINK, &gEnableILK);
             configGetInt(configOPL, CONFIG_OPL_ENABLE_MX4SIO, &gEnableMX4SIO);
             configGetInt(configOPL, CONFIG_OPL_SFX, &gEnableSFX);
@@ -1099,6 +1101,7 @@ static void _saveConfig()
 #ifdef __DEBUG
         configSetInt(configOPL, CONFIG_OPL_MMCE_GAMEID, gMMCEEnableGameID);
 #endif
+        configSetInt(configOPL, CONFIG_OPL_MMCE_SEMA, gMMCESema);
         configSetInt(configOPL, CONFIG_OPL_BDM_CACHE, bdmCacheSize);
         configSetInt(configOPL, CONFIG_OPL_HDD_CACHE, hddCacheSize);
         configSetInt(configOPL, CONFIG_OPL_SMB_CACHE, smbCacheSize);
@@ -1739,6 +1742,7 @@ static void setDefaults(void)
 #ifdef __DEBUG
     gMMCEEnableGameID = 1;
 #endif
+    gMMCESema = 1; //SA_THPRI
 
     gEnableILK = 0;
     gEnableMX4SIO = 0;
