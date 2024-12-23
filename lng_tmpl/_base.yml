@@ -690,7 +690,7 @@ gui_strings:
   string: Advanced
 - label: MMCE_SETTINGS
   string: MMCE Settings
-- label: MMCE_SEMA
-  string: Lock Sema Enqueuing Method
-- label: HINT_MMCE_SEMA
-  string: THFIFO may help with compatibility but worsen performance
+- label: MMCE_WAIT_CYCLES
+  string: Wait cycles after /ACK low
+- label: HINT_MMCE_WAIT_CYCLES
+  string: Lower values may improve performance but result in instabilities

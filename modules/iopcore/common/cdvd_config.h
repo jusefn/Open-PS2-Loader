@@ -91,7 +91,7 @@ struct cdvdman_settings_mmce
     int port;
     int iso_fd;
     int vmc_fd;
-    int sema_enq_method;
+    int ack_wait_cycles;
 } __attribute__((packed));
 
 #define CDVDMAN_SETTINGS_DEFAULT_COMMON                    \
