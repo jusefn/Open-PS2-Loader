@@ -103,6 +103,7 @@ enum CONFIG_INDEX {
 #define CONFIG_OPL_MMCE_WAIT_CYCLES     "mmce_wait_cylces"
 #define CONFIG_OPL_ENABLE_ILINK         "enable_ilink"
 #define CONFIG_OPL_ENABLE_MX4SIO        "enable_mx4sio"
+#define CONFIG_OPL_ENABLE_BDMHDD        "enable_bdm_hdd"
 #define CONFIG_OPL_SWAP_SEL_BUTTON      "swap_select_btn"
 #define CONFIG_OPL_PARENTAL_LOCK_PWD    "parental_lock_password"
 #define CONFIG_OPL_SFX                  "enable_sfx"
@@ -112,6 +113,8 @@ enum CONFIG_INDEX {
 #define CONFIG_OPL_BOOT_SND_VOLUME      "boot_snd_volume"
 #define CONFIG_OPL_BGM_VOLUME           "bgm_volume"
 #define CONFIG_OPL_DEFAULT_BGM_PATH     "default_bgm_path"
+#define CONFIG_OPL_XSENSITIVITY         "x_sensitivity"
+#define CONFIG_OPL_YSENSITIVITY         "y_sensitivity"
 
 // Network config keys
 #define CONFIG_NET_ETH_LINKM          "eth_linkmode"

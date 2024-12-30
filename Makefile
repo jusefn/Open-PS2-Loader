@@ -6,11 +6,14 @@ EXTRAVERSION = Beta
 # How to DEBUG?
 # Simply type "make <debug mode>" to build OPL with the necessary debugging functionality.
 # Debug modes:
-#	debug		-	UI-side debug mode (UDPTTY)
-#	iopcore_debug	-	UI-side + iopcore debug mode (UDPTTY).
-#	ingame_debug	-	UI-side + in-game debug mode. IOP core modules will not be built as debug versions (UDPTTY).
-#	eesio_debug	-	UI-side + eecore debug mode (EE SIO)
-#	deci2_debug	-	UI-side + in-game DECI2 debug mode (EE-side only).
+#	debug		    	 -	UI-side debug mode (UDPTTY)
+#	iopcore_debug		 -	UI-side + iopcore debug mode (UDPTTY).
+#	ingame_debug		 -	UI-side + in-game debug mode. IOP core modules will not be built as debug versions (UDPTTY).
+#	debug_ppctty		 -	UI-side debug mode (PowerPC UART)
+#	iopcore_ppctty_debug -	UI-side + iopcore debug mode (PowerPC UART).
+#	ingame_ppctty_debug	 -	UI-side + in-game debug mode. IOP core modules will not be built as debug versions (PowerPC UART).
+#	eesio_debug			 -	UI-side + eecore debug mode (EE SIO)
+#	deci2_debug			 -	UI-side + in-game DECI2 debug mode (EE-side only).
 
 # I want to put my name in my custom build! How can I do it?
 # Type "make LOCALVERSION=-foobar"
@@ -21,11 +24,14 @@ EXTRAVERSION = Beta
 # Do not COMMENT out the variables!!
 # You can also specify variables when executing make: "make RTL=1 IGS=1 PADEMU=1"
 
-#Enables/disables Right-To-Left (RTL) language support
-RTL ?= 0
+# Check if EXTRA_FEATURES is set, default to 0
+EXTRA_FEATURES ?= 0
 
+# Set RTL and IGS based on EXTRA_FEATURES, but allow user overrides
+#Enables/disables Right-To-Left (RTL) language support
+RTL ?= $(EXTRA_FEATURES)
 #Enables/disables In Game Screenshot (IGS). NB: It depends on GSM and IGR to work
-IGS ?= 1
+IGS ?= $(EXTRA_FEATURES)
 
 #Enables/disables pad emulator
 PADEMU ?= 1
@@ -41,6 +47,8 @@ DEBUG ?= 0
 EESIO_DEBUG ?= 0
 INGAME_DEBUG ?= 0
 DECI2_DEBUG ?= 0
+#How the TTY will reach developer: 'UDP', 'PPC_UART'.
+TTY_APPROACH ?= UDP
 
 # ======== DO NOT MODIFY VALUES AFTER THIS POINT! UNLESS YOU KNOW WHAT YOU ARE DOING ========
 REVISION = $(shell expr $(shell git rev-list --count HEAD) + 2)
@@ -77,18 +85,19 @@ IOP_OBJS =	iomanx.o filexio.o ps2fs.o usbd.o bdmevent.o \
 		iremsndpatch.o apemodpatch.o f2techioppatch.o cleareffects.o resetspu.o \
 		libsd.o audsrv.o
 
-EECORE_OBJS = ee_core.o ioprp.o util.o imgdrv.o eesync.o \
-		bdm_cdvdman.o IOPRP_img.o smb_cdvdman.o \
-		hdd_cdvdman.o mmce_cdvdman.o hdd_hdpro_cdvdman.o cdvdfsv.o \
+EECORE_OBJS = ee_core.o ioprp.o util.o \
+		udnl.o imgdrv.o eesync.o \
+		bdm_cdvdman.o bdm_ata_cdvdman.o IOPRP_img.o smb_cdvdman.o \
+		hdd_cdvdman.o hdd_hdpro_cdvdman.o mmce_cdvdman.o cdvdfsv.o \
 		ingame_smstcpip.o smap_ingame.o smbman.o smbinit.o
 
 PNG_ASSETS = load0 load1 load2 load3 load4 load5 load6 load7 usb usb_bd ilk_bd \
-	m4s_bd hdd eth app cross triangle circle square select start left right \
-	background info cover disc screen ELF HDL ISO UL CD DVD Aspect_s Aspect_w Aspect_w1 \
+	m4s_bd hdd_bd hdd eth app cross triangle circle square select start left right \
+	background info cover disc screen ELF HDL ISO ZSO UL APPS CD DVD Aspect_s Aspect_w Aspect_w1 \
 	Aspect_w2 Device_1 Device_2 Device_3 Device_4 Device_5 Device_6 Device_all Rating_0 \
 	Rating_1 Rating_2 Rating_3 Rating_4 Rating_5 Scan_240p Scan_240p1 Scan_480i Scan_480p \
 	Scan_480p1 Scan_480p2 Scan_480p3 Scan_480p4 Scan_480p5 Scan_576i Scan_576p Scan_720p \
-	Scan_1080i Scan_1080i2 Scan_1080p Vmode_multi Vmode_ntsc Vmode_pal logo case \
+	Scan_1080i Scan_1080i2 Scan_1080p Vmode_multi Vmode_ntsc Vmode_pal logo case apps_case\
 	Index_0 Index_1 Index_2 Index_3 Index_4
 	# unused icons - up down l1 l2 l3 r1 r2 r3
 
@@ -117,9 +126,8 @@ PNG_ASSETS_DIR = gfx/
 MAPFILE = opl.map
 EE_LDFLAGS += -Wl,-Map,$(MAPFILE)
 
-EE_LIBS = -L$(PS2SDK)/ports/lib -L$(GSKIT)/lib -L./lib -lgskit -ldmakit -lgskit_toolkit -lpoweroff -lfileXio -lpatches -ljpeg_ps2_addons -ljpeg -lpng -lz -lmc -lfreetype -lvux -lcdvd -lnetman -lps2ips -laudsrv -lvorbisfile -lvorbis -logg -lpadx -lelf-loader-nocolour
-EE_INCS += -I$(PS2SDK)/ports/include -I$(PS2SDK)/ports/include/freetype2 -I$(GSKIT)/include -I$(GSKIT)/ee/dma/include -I$(GSKIT)/ee/gs/include -I$(GSKIT)/ee/toolkit/include -Imodules/iopcore/common -Imodules/network/common -Imodules/hdd/common -Iinclude
-
+EE_LIBS = -L$(PS2SDK)/ports/lib -L$(GSKIT)/lib -L./lib -lgskit -ldmakit -lpoweroff -lfileXio -lpatches -lpng -lz -lmc -lfreetype -lvux -lcdvd -lnetman -lps2ips -laudsrv -lvorbisfile -lvorbis -logg -lpadx -lelf-loader-nocolour
+EE_INCS += -I$(PS2SDK)/ports/include -I$(PS2SDK)/ports/include/freetype2 -I$(GSKIT)/include -I$(GSKIT)/ee/dma/include -I$(GSKIT)/ee/gs/include -Imodules/iopcore/common -Imodules/network/common -Imodules/hdd/common -Iinclude
 BIN2C = $(PS2SDK)/bin/bin2c
 
 # WARNING: Only extra spaces are allowed and ignored at the beginning of the conditional directives (ifeq, ifneq, ifdef, ifndef, else and endif)
@@ -132,6 +140,9 @@ endif
 ifeq ($(DTL_T10000),1)
   EE_CFLAGS += -D_DTL_T10000
   EECORE_EXTRA_FLAGS += DTL_T10000=1
+  UDNL_OUT = $(PS2SDK)/iop/irx/udnl-t300.irx
+else
+  UDNL_OUT = $(PS2SDK)/iop/irx/udnl.irx
 endif
 
 ifeq ($(IGS),1)
@@ -155,23 +166,31 @@ ifeq ($(DEBUG),1)
   ifeq ($(DECI2_DEBUG),1)
     EE_OBJS += debug.o drvtif_irx.o tifinet_irx.o deci2_img.o
     EE_LDFLAGS += -liopreboot
-  else
+  else ifeq ($(TTY_APPROACH),UDP)
     EE_OBJS += debug.o udptty.o ioptrap.o ps2link.o
+    EE_CFLAGS += -DTTY_UDP
+  else ifeq ($(TTY_APPROACH),PPC_UART)
+    EE_OBJS += debug.o ppctty.o ioptrap.o
+    EE_CFLAGS += -DTTY_PPC_UART
+  else
+	$(error Unknown value for TTY_APPROACH: '$(TTY_APPROACH)')
   endif
   MOD_DEBUG_FLAGS = DEBUG=1
   ifeq ($(IOPCORE_DEBUG),1)
     EE_CFLAGS += -D__INGAME_DEBUG
-    EECORE_EXTRA_FLAGS = LOAD_DEBUG_MODULES=1
+    EECORE_EXTRA_FLAGS += LOAD_DEBUG_MODULES=1
     CDVDMAN_DEBUG_FLAGS = IOPCORE_DEBUG=1
     MCEMU_DEBUG_FLAGS = IOPCORE_DEBUG=1
     SMSTCPIP_INGAME_CFLAGS =
-    IOP_OBJS += udptty-ingame.o
+    ifeq ($(TTY_APPROACH),UDP)
+      IOP_OBJS += udptty-ingame.o
+    endif
   else ifeq ($(EESIO_DEBUG),1)
     EE_CFLAGS += -D__EESIO_DEBUG
     EE_LIBS += -lsiocookie
   else ifeq ($(INGAME_DEBUG),1)
     EE_CFLAGS += -D__INGAME_DEBUG
-    EECORE_EXTRA_FLAGS = LOAD_DEBUG_MODULES=1
+    EECORE_EXTRA_FLAGS += LOAD_DEBUG_MODULES=1
     CDVDMAN_DEBUG_FLAGS = IOPCORE_DEBUG=1
     SMSTCPIP_INGAME_CFLAGS =
     ifeq ($(DECI2_DEBUG),1)
@@ -180,8 +199,11 @@ ifeq ($(DEBUG),1)
       IOP_OBJS += drvtif_ingame_irx.o tifinet_ingame_irx.o
       DECI2_DEBUG=1
       CDVDMAN_DEBUG_FLAGS = USE_DEV9=1 #(clear IOPCORE_DEBUG) dsidb cannot be used to handle exceptions or set breakpoints, so disable output to save resources.
-    else
+    else ifeq ($(TTY_APPROACH),UDP)
       IOP_OBJS += udptty-ingame.o
+      EECORE_EXTRA_FLAGS += "TTY_APPROACH=$(TTY_APPROACH)"
+    else ifeq ($(TTY_APPROACH),PPC_UART)
+      EECORE_EXTRA_FLAGS += "TTY_APPROACH=$(TTY_APPROACH)"
     endif
   endif
 else
@@ -205,7 +227,7 @@ EE_LDFLAGS += -fdata-sections -ffunction-sections -Wl,--gc-sections
 
 .SILENT:
 
-.PHONY: all release debug iopcore_debug eesio_debug ingame_debug deci2_debug clean rebuild pc_tools pc_tools_win32 oplversion format format-check ps2sdk-not-setup download_lng download_lwNBD languages
+.PHONY: all release debug iopcore_debug eesio_debug ingame_debug deci2_debug debug_ppctty iopcore_ppctty_debug ingame_ppctty_debug clean rebuild pc_tools pc_tools_win32 oplversion format format-check ps2sdk-not-setup download_lng download_lwNBD languages
 
 ifdef PS2SDK
 
@@ -235,6 +257,15 @@ ingame_debug:
 deci2_debug:
 	$(MAKE) DEBUG=1 INGAME_DEBUG=1 DECI2_DEBUG=1 all
 
+debug_ppctty:
+	$(MAKE) DEBUG=1 TTY_APPROACH=PPC_UART all
+
+iopcore_ppctty_debug:
+	$(MAKE) DEBUG=1 IOPCORE_DEBUG=1 TTY_APPROACH=PPC_UART all
+
+ingame_ppctty_debug:
+	$(MAKE) DEBUG=1 INGAME_DEBUG=1 TTY_APPROACH=PPC_UART all
+
 clean:	download_lwNBD
 	echo "Cleaning..."
 	echo "-Interface"
@@ -246,6 +277,7 @@ clean:	download_lwNBD
 	$(MAKE) -C modules/iopcore/imgdrv clean
 	echo " -cdvdman"
 	$(MAKE) -C modules/iopcore/cdvdman USE_BDM=1 clean
+	$(MAKE) -C modules/iopcore/cdvdman USE_BDM_ATA=1 clean
 	$(MAKE) -C modules/iopcore/cdvdman USE_MMCE=1 clean
 	$(MAKE) -C modules/iopcore/cdvdman USE_SMB=1 clean
 	$(MAKE) -C modules/iopcore/cdvdman USE_HDD=1 clean
@@ -363,6 +395,9 @@ ee_core/ee_core.elf: ee_core
 $(EE_ASM_DIR)ee_core.c: ee_core/ee_core.elf | $(EE_ASM_DIR)
 	$(BIN2C) $< $@ eecore_elf
 
+$(EE_ASM_DIR)udnl.c: $(UDNL_OUT) | $(EE_ASM_DIR)
+	$(BIN2C) $(UDNL_OUT) $@ udnl_irx
+
 $(EE_ASM_DIR)mmceman.c: $(PS2SDK)/iop/irx/mmceman.irx | $(EE_ASM_DIR)
 	$(BIN2C) $< $@ $(*F)_irx
 
@@ -383,6 +418,12 @@ modules/iopcore/cdvdman/bdm_cdvdman.irx: modules/iopcore/cdvdman
 
 $(EE_ASM_DIR)bdm_cdvdman.c: modules/iopcore/cdvdman/bdm_cdvdman.irx | $(EE_ASM_DIR)
 	$(BIN2C) $< $@ $(*F)_irx
+
+modules/iopcore/cdvdman/bdm_ata_cdvdman.irx: modules/iopcore/cdvdman
+	$(MAKE) $(CDVDMAN_PS2LOGO_FLAGS) $(CDVDMAN_DEBUG_FLAGS) USE_BDM_ATA=1 -C $< all
+
+$(EE_ASM_DIR)bdm_ata_cdvdman.c: modules/iopcore/cdvdman/bdm_ata_cdvdman.irx | $(EE_ASM_DIR)
+	$(BIN2C) $< $@ bdm_ata_cdvdman_irx
 
 modules/iopcore/cdvdman/mmce_cdvdman.irx: modules/iopcore/cdvdman
 	$(MAKE) $(CDVDMAN_PS2LOGO_FLAGS) $(CDVDMAN_DEBUG_FLAGS) USE_MMCE=1 -C $< all
@@ -598,7 +639,7 @@ modules/network/smbinit/smbinit.irx: modules/network/smbinit
 $(EE_ASM_DIR)smbinit.c: modules/network/smbinit/smbinit.irx | $(EE_ASM_DIR)
 	$(BIN2C) $< $@ $(*F)_irx
 
-$(EE_ASM_DIR)ps2atad.c: $(PS2SDK)/iop/irx/ps2atad.irx | $(EE_ASM_DIR)
+$(EE_ASM_DIR)ps2atad.c: $(PS2SDK)/iop/irx/ata_bd.irx | $(EE_ASM_DIR)
 	$(BIN2C) $< $@ $(*F)_irx
 
 $(EE_ASM_DIR)hdpro_atad.c: $(PS2SDK)/iop/irx/hdproatad.irx | $(EE_ASM_DIR)
@@ -632,6 +673,9 @@ $(EE_ASM_DIR)lwnbdsvr.c: modules/network/lwNBD/lwnbdsvr.irx | $(EE_ASM_DIR)
 	$(BIN2C) $< $@ $(*F)_irx
 
 $(EE_ASM_DIR)udptty.c: $(PS2SDK)/iop/irx/udptty.irx | $(EE_ASM_DIR)
+	$(BIN2C) $< $@ $(*F)_irx
+
+$(EE_ASM_DIR)ppctty.c: $(PS2SDK)/iop/irx/ppctty.irx | $(EE_ASM_DIR)
 	$(BIN2C) $< $@ $(*F)_irx
 
 modules/debug/udptty-ingame/udptty.irx: modules/debug/udptty-ingame
